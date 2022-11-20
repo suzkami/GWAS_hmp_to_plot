@@ -4,6 +4,7 @@
 #1. output in output_home
 #2. function selection
 #3. violin plot
+#4. output list of sigsnps
 
 GWAS <- function(
     input_home = getwd(),
@@ -32,11 +33,15 @@ GWAS <- function(
   print("LD decay done")
   
   #circulation for:
+  #siglist <- as.data.frame(hmp[1,])
+  #siglist[1,] <- names(siglist)
+  
   for (cirn in 4:ncol(plot_file)) {
     plot_file_cir <<- plot_file[,c(1,2,3,cirn)]
     if (nrow(plot_file_cir[plot_file_cir[, 4] < 0.05/nrow(plot_file_cir), ]) > 0 ){
       # 1. Significant snp selection --> summary for output [rs, Chr, POS, Allele, AlleleA, AlleleB, AlleleC, P, traits]
       sigsnptemp <- sigsnp(plot_file_cir) #<<- for test; change to <- when finished
+      #siglist <- cbind(siglist, sigsnptemp)
       print(paste0("significant snp collected: ", names(plot_file_cir)[4],"_done"))
       
       # 2. Get candidate region (Sigsnp +- LDG/ABD)
@@ -60,4 +65,5 @@ GWAS <- function(
       }
     }
   }
+  #write.table(siglist, "siglist.txt", row.names = F, col.names = F, sep = "\t", quote = F)
 }
