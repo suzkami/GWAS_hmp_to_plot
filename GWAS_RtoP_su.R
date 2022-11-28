@@ -4,21 +4,38 @@
 #function A: setting required
 #All the results, hmp and LD file should in one same results document
 
-requirment <- function(input_home = getwd(), hmp = "NA", LD = "NA", output_home = getwd(), LDGinput = 4){
-    #require library----
+requirment <- function(
+    input_home = getwd(), 
+    hmpfile = "NA", 
+    LDfile = "NA", 
+    output_home = getwd(), 
+    LDGinput = 4,
+    ptype_filte = "NA",
+    phenofile = "NA",
+    PvsG = T){
+    
+  #require library----
     library(tidyverse)
     library(snp.plotter)
     source("https://raw.githubusercontent.com/YinLiLin/CMplot/master/R/CMplot.r")
     
     #require input----
     input_home <<- input_home
-    #hmp is must needed, can transform from vcf by tassel
- 
-    hmp <<-  read.table(paste0(input_home, "/", hmp), header = T, fill = T)
-    if (LD != "NA"){
-      LD <<- read.table(paste0(input_home, "/", LD), header = T, fill = T)
-      }
+    #hmpfile is must needed, can transform from vcf by tassel
     
+    hmp <<-  read.table(paste0(input_home, "/", hmpfile), header = T, fill = T, check.names = F)
+    
+    if (LDfile != "NA"){
+      LD <<- read.table(paste0(input_home, "/", LDfile), header = T, fill = T)
+      }
+   
+    if (PvsG == T) {
+     ifelse(phenofile == "NA", print("please input the name of phenotype or set PvsG to F"), 
+            pheno <<- read.table(paste0(input_home, "/", phenofile), header = T, check.names = F))
+      ifelse(ptype_filte == "NA", print("please input the name of ptype_filte or set PvsG to F"),
+            ptype <<- read.table(paste0(input_home, "/", ptype_filte), header = T, check.names = F))
+    }
+
     #require output load
     output_home <<- output_home
   }
@@ -37,7 +54,7 @@ readinput <- function(type = "EMMA"){
     }
   }else{
     #from_tassel_file
-    flist <- list.files(path = input_home, pattern = "LM")
+    flist <- list.files(path = input_home, pattern = type)
     plot_file <- hmp[,c(1,3,4)]
     for (i in 1:length(flist)){
       assign(str_sub(flist[i], 1, -5), read.table(paste0(input_home, "/", flist[i]), header = T, fill = T))
@@ -76,10 +93,10 @@ Man_QQ_plot <- function(plot_file){
          threshold.lty=c(1,2), threshold.lwd=c(2,2), threshold.col=c("black","black"), 
          amplify = T,
          #判断为几倍体，需要几个颜色
-         if (length(plot_file[!duplicated(plot_file$"Chr"),2] == 2)) {
-           col = c("orange","blue")}
-         else{
-             col = c("orange","blue", "darkgreen")
+         if (length(plot_file[!duplicated(plot_file$"Chr"),2]) == 14){
+           col = c("orange","blue")
+           }else{
+             col = c("orange", "blue", "darkgreen")
              },
          file="jpg",memo="",dpi=300, width = 20, lwd.axis = 3, height = 6,
          file.output=TRUE, signal.col = c("red","red"), signal.cex = 1,
@@ -105,6 +122,7 @@ LDdecay <- function(n){
     
     distance <- LDtemp$Dist_mb
     LDtemp.data <- LDtemp$R2
+    n <- ncol(hmp) - 11 #number of individuals in genotype data set, for LDdecay calculate
     
     HW.st<-c(C=0)
     HW.nonlinear<-nls(LDtemp.data~((10+C*distance)/((2+C*distance)*(11+C*distance)))*(1+((3+C*distance)*(12+12*C*distance+(C*distance)^2))/(n*(2+C*distance)*(11+C*distance))),start=HW.st,control=nls.control(maxiter=1000))
@@ -141,7 +159,7 @@ sigsnp <- function(plot_file){
     sigsnp_hmp[,6:9] <- allele_infor
     sigsnp_hmp[,10] <- sigsnp_temp[,4]
     sigsnp_hmp[,11] <- names(plot_file)[4]
-    names(sigsnp_hmp)[6:11] <- c("Allele1", "Allele2", "Allele3", "AlleleT", names(sigsnp_temp)[4], "traits")
+    names(sigsnp_hmp)[6:11] <- c("Allele1", "Allele2", "Allele3", "AlleleT", "p", "traits")
     return(sigsnp_hmp)
 }
 
@@ -149,7 +167,7 @@ sigsnp <- function(plot_file){
 MTA_range <- function(sigsnp_hmp, LDG){
   #先分染色体，再分染色体块
   chr <- sigsnp_hmp$chrom[!duplicated(sigsnp_hmp$chrom)]
-  traitname <- names(sigsnp_hmp)[10]
+  traitname <- names(plot_file_cir)[4]
   
   for (i in 1:length(chr)) {
     snp_chr <- sigsnp_hmp[sigsnp_hmp$chrom == chr[i],]
@@ -185,13 +203,10 @@ MTA_range <- function(sigsnp_hmp, LDG){
     
     MTA <- rbind(MTA, loop)
     MTA <- MTA[!duplicated(MTA[,1]),]
-    
-    MTA$assembly <- rowSums(MTA[,12:ncol(MTA)] == str_sub(MTA$alleles, 1,1))
-    MTA$center <- rowSums(MTA[,12:ncol(MTA)] == str_sub(MTA$alleles, 3,3))
-    MTA$protLSID <- rowSums(MTA[,12:ncol(MTA)] == str_sub(MTA$alleles, 5,5))
     MTA$panelLSID <- plot_file_cir[plot_file_cir$Marker %in% MTA$rs, 4]
-    names(MTA[6:8]) <- c("allele1", "allele2", "allele3") 
-    
+    MTA$QCcode <- names(plot_file_cir)[4]
+    MTA[,6:9] <- Allele_number(MTA)
+  
     list_temp[[i]] <- MTA
     names(list_temp)[i] <- MTA_1_trait[i]
   }
@@ -261,17 +276,117 @@ LDheatmap <- function(MTArange){
 
 
 #violion plot / barplot----
-# config_in <- data.frame(label = c("SNP.FILE", "COLOR.LIST", "GENOTYPE.FILE", "IMAGE.NAME"), connect = "=", value = "NA")
-# config_out <- config
-# config_out[c(1,3,4,6),] <- str_c(config[,1], config[,2], config[,3]) 
+#phenotype_file + siglist
+#color depend on alleles
 
+#Phenotype vs best SNP allele of each peak
+#1 get phenotype exist in siglist
+#2 judege discrete or countine
+#3 need group infor or not
+#4 prepare for violin or bar plot
 
+GenovsPheno <- function(MTArange, pheno, ptype){
+  #Thics functiuon can run slef by using the output filed from function_GWAS: 
+    #1. siglist for all the sigsnps
+    #2. phenotype data used for GWAS
+    #3. phenotype data type (eg. discrete or quantity)
+  
+#----plot required functions, should in preparation step  
+  #function inside GenovsPheno, for generate SNPs lsit
+  Allele_plot <- function(geno_temp){
+    allele <- data.frame(str_split(geno_temp$alleles, "/"))
+    allele <- allele[order(allele[,1]),]
+    if (geno_temp$assayLSID != (ncol(geno_temp) - 11)) { allele = c(allele, "N") }
+  }
+  
+  #function for plots
+  savesvg <- function(plot, name){
+    svg(paste0(name, ".svg"))
+    print(plot)
+    dev.off()
+  }
+  
+  #violin
+  violin_plots <- function(plot_temp = plot_temp, allele_color = allele_color, SNPs = SNPs, geno_temp = geno_temp){
+    p <- ggplot(plot_temp, aes(x = Genotype, y = Phenotype, fill = Genotype))+
+            geom_violin(width = 1)+
+            scale_x_discrete(limits = SNPs)+
+            geom_jitter(height = 0, width = 0.1, alpha=0.8)+
+            geom_boxplot(width=0.1, color="red", alpha=0.2, size = 1)+
+            scale_fill_manual(values = allele_color)+
+            theme_bw()+
+            labs(x="Aelles", y="Phenotype", title = paste0(geno_temp$QCcode, "_", geno_temp$chrom))+
+            theme(legend.position ="none", 
+                  panel.background = element_rect(fill = "white", colour = "grey50"),
+                  axis.text = element_text(colour = "black", size = rel(2)),
+                  axis.title.x = element_text(size = 20),
+                  axis.title.y = element_text(size = 20),
+                  plot.title = element_text(size = 20))
+    
+    savesvg(plot = p, name = paste0("violinplot", geno_temp$QCcode, "_", geno_temp$chrom, geno_temp$pos))
+  }
+  
+  #bar plot
+  bar_plots <- function(plot_temp = plot_temp, trait_color = trait_color, geno_temp = geno_temp){
+    temp <- plot_temp 
+    temp <- temp %>% group_by(Genotype, Phenotype) %>% summarise(n = n()) %>% as.data.frame()
+    temp_non <- filter(temp, Genotype != 'N')
+    temp_n <- filter(temp, Genotype == 'N')
+    temp_non <- temp_non[order(temp_non[,1]),]
+    
+    temp <- rbind(temp_non, temp_n)
+    
+    p <- ggplot(temp, aes(x = Genotype, y = n, fill = factor(Phenotype)))+
+      geom_bar(stat="identity", position = position_stack(), width = 0.6, )+
+      scale_fill_manual(values = trait_color)+
+      theme_minimal() +
+      theme_classic() +
+      theme_bw()+
+      labs(y = "Numbers",title = " ") +
+      theme(legend.position ="bottom", legend.box = "horizontal",
+            legend.title = element_blank(),
+            legend.text = element_text(size = 18),
+            panel.background = element_rect(fill = "white", colour = "grey50"),
+            axis.text = element_text(colour = "black", size = rel(1.5)),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size = 18),
+            plot.title = element_text(size = 20),
+            text = element_text(family = "Arial"))
+      
+    savesvg(plot = p, name = paste0("barpolot", geno_temp$QCcode, "_", geno_temp$chrom, geno_temp$pos))
+  }
+#----  
 
+  #main body
+  #input MTArange, pheno, ptype; output plot_temp, allele_color, SNPs, geno_temp
+  slist <- MTArange[[1]][1,]
+  
+  for (i in 1:length(MTArange)){
+    ptemp <- MTArange[[i]]
+    slist[i,] <- arrange(ptemp, panelLSID)[1,]
+  }
 
+  for (i in 1:nrow(slist)) {
+    pheno_temp <- pheno[,c(1, which(names(pheno) == slist$QCcode[i]))]
+    geno_temp <- slist[i,]
+    geno_pheno_temp <- data.frame(t(geno_temp))
+    geno_pheno_temp[,2] <- rownames(geno_pheno_temp)
+    names(geno_pheno_temp) <- c("Allele","<Trait>")
 
-
-
-
+    plot_temp <- merge(pheno_temp, geno_pheno_temp, by = "<Trait>")
+    names(plot_temp) <- c("ID", "Phenotype", "Genotype")
+    
+    SNPs <- Allele_plot(geno_temp)
+    allele_color <- c("A" = "#FF3333", "G" = "#FF7F00", "N" = "gray", "C" = "#4DAF4A", "T" = "#3399FF", "+" = "#FF7F00", "-" = "#4DAF4A")
+    trait_color <- c("#00CC00", "#FF0000", "#FF8000", "#3399FF", "#CCOOCC", "gray")
+    #discrete or continue
+    if (ptype[geno_temp$QCcode == ptype$tid, 2] == "dicrete") {
+      violin_plots(plot_temp, allele_color, SNPs, geno_temp)
+    }else{
+      bar_plots(plot_temp = plot_temp, trait_color = trait_color, geno_temp = geno_temp)
+    }
+  }
+}
 
 
 
