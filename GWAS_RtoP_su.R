@@ -380,7 +380,7 @@ GenovsPheno <- function(MTArange, pheno, ptype){
     allele_color <- c("A" = "#FF3333", "G" = "#FF7F00", "N" = "gray", "C" = "#4DAF4A", "T" = "#3399FF", "+" = "#FF7F00", "-" = "#4DAF4A")
     trait_color <- c("#00CC00", "#FF0000", "#FF8000", "#3399FF", "#CCOOCC", "gray")
     #discrete or continue
-    if (ptype[geno_temp$QCcode == ptype$tid, 2] == "discrete") {
+    if (ptype[geno_temp$QCcode == ptype$tid, 2] != "discrete") {
       violin_plots(plot_temp, allele_color, SNPs, geno_temp)
     }else{
       bar_plots(plot_temp = plot_temp, trait_color = trait_color, geno_temp = geno_temp)
