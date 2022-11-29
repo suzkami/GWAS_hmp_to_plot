@@ -361,6 +361,8 @@ GenovsPheno <- function(MTArange, pheno, ptype){
   #input MTArange, pheno, ptype; output plot_temp, allele_color, SNPs, geno_temp
   slist <- MTArange[[1]][1,]
   
+  names(ptype) <- c("ID", "type")
+
   for (i in 1:length(MTArange)){
     ptemp <- MTArange[[i]]
     slist[i,] <- arrange(ptemp, panelLSID)[1,]
