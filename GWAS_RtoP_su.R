@@ -178,14 +178,13 @@ MTA_range <- function(sigsnp_hmp, LDG){
     }else{
       for (n in 2:nrow(snp_chr)) {
         pos_dis <- snp_chr$pos[n] - snp_chr$pos[n-1]
-        if (pos_dis < LDG*1000000) {
+        if (pos_dis > LDG*1000000) {
           assign(paste0(traitname, chr[i], "MTA_", index1), snp_chr[(n-index2):n,])
-          index2 <- index2 + 1
-        }else{
-          index1 <- index1 + 1 
-          assign(paste0(traitname, chr[i], "MTA_", index1), snp_chr[index2:n,])
+          index1 <- index1 + 1
           index2 <- 1
-        }
+        }else{
+          index2 <- index2 + 1 
+          }
       }
     }
   }
