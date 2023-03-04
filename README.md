@@ -16,4 +16,5 @@ GWAS(hmpfile = "./6xhmp50362**.hmp.txt**",
      **phenofile** = "./Test.txt",   
      type = "MLM", ptype_filte = "./ptype.txt")  
 
-
+*Phenotype ID name sould be <Trait>
+*EMMAX must use emmax-intel64
