@@ -10,6 +10,10 @@ source("https://raw.githubusercontent.com/suzkami/GWAS_hmp_to_plot/main/function
 (B)Phenotype file (same accession ID as hapmap file) df.txt  
 (C)LD calculate by Plink or TASSEL; for candidate region narrow down.  
 
+## note
+Only support the output formation from TASSEL and EMMAX.
+When use EMMAX, the out put prefix should be same as the Phenotype name.
+
 #example
 GWAS(hmpfile = "./6xhmp50362**.hmp.txt**",  
      LDfile = "./GRDA6X50362**.ld**",   
