@@ -307,16 +307,19 @@ GenovsPheno <- function(MTArange, pheno, ptype){
   
   #violin
   violin_plots <- function(plot_temp = plot_temp, allele_color = allele_color, SNPs = SNPs, geno_temp = geno_temp){
-    range <- max(plot_temp$Phenotype) - min(plot_temp$Phenotype)  
+    range <- max(plot_temp$Phenotype, na.rm = T) - min(plot_temp$Phenotype, na.rm = T)  
+    max_value <- min(plot_temp$Phenotype, na.rm = T) - range*0.15
+    min_value <- max(plot_temp$Phenotype, na.rm = T) + range*0.2
+      
     p <- ggplot(plot_temp, aes(x = Genotype, y = Phenotype, fill = Genotype))+
             geom_violin(width = 1)+
             scale_x_discrete(limits = SNPs)+
             geom_jitter(height = 0, width = 0.1, alpha=0.8)+
             geom_boxplot(width=0.1, color="red", alpha=0.2, size = 1)+
             scale_fill_manual(values = allele_color)+
-            scale_y_continuous(limits = c(min(plot_temp$Phenotype) - range*0.2, max(plot_temp$Phenotype) + range*0.3),
-                               breaks = ceiling(seq(min(plot_temp$Phenotype) - range*0.2, max(plot_temp$Phenotype) + range*0.3, 
-                               by = round((max(plot_temp$Phenotype) - min(plot_temp$Phenotype) + range*0.2) + range*0.3)/5)))+
+            scale_y_continuous(limits = c(min_value, max_value),
+                               breaks = ceiling(seq(min_value, max_value, 
+                               by = round((max_value - min_value)/5))))+
             theme_bw()+
             labs(x="Aelles", y="Phenotype", title = paste0(geno_temp$QCcode, "_", geno_temp$chrom))+
             theme(legend.position ="none", 
