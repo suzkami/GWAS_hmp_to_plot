@@ -308,8 +308,8 @@ GenovsPheno <- function(MTArange, pheno, ptype){
   #violin
   violin_plots <- function(plot_temp = plot_temp, allele_color = allele_color, SNPs = SNPs, geno_temp = geno_temp){
     range <- max(plot_temp$Phenotype, na.rm = T) - min(plot_temp$Phenotype, na.rm = T)  
-    max_value <- min(plot_temp$Phenotype, na.rm = T) - range*0.15
-    min_value <- max(plot_temp$Phenotype, na.rm = T) + range*0.2
+    min_value <- min(plot_temp$Phenotype, na.rm = T) - range*0.15
+    max_value <- max(plot_temp$Phenotype, na.rm = T) + range*0.2
       
     p <- ggplot(plot_temp, aes(x = Genotype, y = Phenotype, fill = Genotype))+
             geom_violin(width = 1)+
