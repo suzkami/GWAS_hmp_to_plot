@@ -319,7 +319,7 @@ GenovsPheno <- function(MTArange, pheno, ptype){
             scale_fill_manual(values = allele_color)+
             scale_y_continuous(limits = c(min_value, max_value),
                                breaks = ceiling(seq(min_value, max_value, 
-                               by = round((max_value - min_value)/5))))+
+                               by = round((max_value - min_value)/5, 2))))+
             theme_bw()+
             labs(x="Aelles", y="Phenotype", title = paste0(geno_temp$QCcode, "_", geno_temp$chrom))+
             theme(legend.position ="none", 
