@@ -178,9 +178,8 @@ MTA_range <- function(sigsnp_hmp, LDG){
     }else if (snp_chr$pos[nrow(snp_chr)] - snp_chr$pos[1] < LDG*1000000){
       assign(paste0(traitname, chr[i], "MTA_", index1), snp_chr)
     }else{
-      for (n in 2:(nrow(snp_chr))+1){
+      for (n in 2:(nrow(snp_chr)+1)){
         if (n <= nrow(snp_chr)) {
-        
           pos_dis <- snp_chr$pos[n] - snp_chr$pos[n-1]
           if (pos_dis > LDG*1000000) {
             assign(paste0(traitname, chr[i], "MTA_", index1), snp_chr[(n-index2):(n-1)])
@@ -189,7 +188,6 @@ MTA_range <- function(sigsnp_hmp, LDG){
           }else{
             index2 <- index2 + 1 
           }
-          
         }else{
           pos_dis <- snp_chr$pos[n-1] - snp_chr$pos[n-2]
           if (pos_dis > LDG*1000000) {
@@ -409,21 +407,5 @@ GenovsPheno <- function(MTArange, pheno, ptype){
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
