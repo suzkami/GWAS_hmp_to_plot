@@ -195,6 +195,7 @@ MTA_range <- function(sigsnp_hmp, LDG){
           }else{
             assign(paste0(traitname, chr[i], "MTA_", index1), snp_chr[(n-index2-1):(n-1)])
           }
+        }
       }
     }
   }
