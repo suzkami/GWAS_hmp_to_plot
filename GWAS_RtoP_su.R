@@ -372,6 +372,24 @@ GenovsPheno <- function(MTArange, pheno, ptype){
       
     savesvg(plot = p, name = paste0("barpolot", geno_temp$QCcode, "_", geno_temp$chrom, geno_temp$pos))
   }
+
+#分类汇总条形图
+bar_distribution <- function(plot_temp){
+  SNP <- unique(plot_temp$Genotype)
+  SNP <- SNP[SNP != "N"]
+  color <- c("#2121D9", "darkgreen", "#FF9326", "#FE2E9A")
+  for (i in 1:length(SNP)) {
+    bar_temp <-  filter(plot_temp, Genotype == SNP[i])
+    bar_temp <- table(cut(bar_temp$Phenotype, 
+                      breaks = seq(0, 100, 10), include.lowest = TRUE))
+    if (i == 1) {
+      p <- barplot(bar_temp, col = color[i])
+    }else{
+        p <- barplot(bar_temp, add = T, col = adjustcolor(color[i], alpha.f = 0.5))
+    }
+  }
+ savesvg(plot = p, name = paste0("bardistri", geno_temp$QCcode, "_", geno_temp$chrom, geno_temp$pos))
+}
 #----  
 
   #main body
@@ -401,9 +419,12 @@ GenovsPheno <- function(MTArange, pheno, ptype){
     #allele_color <- c("A" = "#FF3333", "G" = "#FF7F00", "N" = "gray", "C" = "#4DAF4A", "T" = "#3399FF", "+" = "#FF7F00", "-" = "#4DAF4A")
     #trait_color <- c("#00CC00", "#FF0000", "#FF8000", "#3399FF", "#CCOOCC", "gray")
     #discrete or continue
-    if (ptype[geno_temp$QCcode == ptype$ID, 2] != "discrete") {
+    if (ptype[geno_temp$QCcode == ptype$ID, 2] == "quantitative") {
       violin_plots(plot_temp, allele_color, SNPs, geno_temp)
-    }else{
+    }
+      if (ptype[geno_temp$QCcode == ptype$ID, 2] == "groups"){
+        bar_distribution(plot_temp)
+      }else{
       bar_plots(plot_temp = plot_temp, trait_color = trait_color, geno_temp = geno_temp)
     }
   }
