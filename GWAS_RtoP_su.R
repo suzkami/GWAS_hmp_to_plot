@@ -98,7 +98,7 @@ Man_QQ_plot <- function(plot_file){
            }else{
              col = c("orange", "blue", "darkgreen")
              },
-         file="jpg",file.name="",dpi=300, width = 20, lwd.axis = 3, height = 6,
+         file="jpg",file.name="",dpi=300, width = 20, height = 6,
          file.output=TRUE, signal.col = c("red","red"), signal.cex = 1,
          main = " ",
          #highlight = Grasdisnp, highlight.cex= 0.8, highlight.pch = 16, highlight.col = "black"
