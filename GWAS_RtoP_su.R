@@ -377,18 +377,17 @@ GenovsPheno <- function(MTArange, pheno, ptype){
 bar_distribution <- function(plot_temp){
   SNP <- unique(plot_temp$Genotype)
   SNP <- SNP[SNP != "N"]
-  color <- c("#2121D9", "darkgreen", "#FF9326", "#FE2E9A")
+  color <- c("#2121D9", "#FF9326", "darkgreen", "#FE2E9A")
   for (i in 1:length(SNP)) {
     bar_temp <-  filter(plot_temp, Genotype == SNP[i])
     bar_temp <- table(cut(bar_temp$Phenotype, 
                       breaks = seq(0, 100, 10), include.lowest = TRUE))
     if (i == 1) {
-      p <- barplot(bar_temp, col = color[i])
+     barplot(bar_temp, col = color[i])
     }else{
-        p <- barplot(bar_temp, add = T, col = adjustcolor(color[i], alpha.f = 0.5))
+     barplot(bar_temp, add = T, col = adjustcolor(color[i], alpha.f = 0.5))
     }
   }
- savesvg(plot = p, name = paste0("bardistri", geno_temp$QCcode, "_", geno_temp$chrom, geno_temp$pos))
 }
 #----  
 
@@ -425,7 +424,9 @@ bar_distribution <- function(plot_temp){
       if (ptype[geno_temp$QCcode == ptype$ID, 2] == "groups"){
         bar_distribution(plot_temp)
       }else{
-      bar_plots(plot_temp = plot_temp, trait_color = trait_color, geno_temp = geno_temp)
+        SVG(paste0("bardistri", geno_temp$QCcode, "_", geno_temp$chrom, geno_temp$pos), ".svg")
+        bar_plots(plot_temp = plot_temp, trait_color = trait_color, geno_temp = geno_temp)
+        dev.off()
     }
   }
 }
