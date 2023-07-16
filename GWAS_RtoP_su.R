@@ -422,7 +422,7 @@ bar_distribution <- function(plot_temp){
       violin_plots(plot_temp, allele_color, SNPs, geno_temp)
     }
       if (ptype[geno_temp$QCcode == ptype$ID, 2] == "groups"){
-        svg(paste0("bardistri", geno_temp$QCcode, "_", geno_temp$chrom, geno_temp$pos), ".svg")
+        svg(paste0("bardistri", geno_temp$QCcode, "_", geno_temp$chrom, geno_temp$pos, ".svg"))
         bar_distribution(plot_temp)
         dev.off()
       }else{
