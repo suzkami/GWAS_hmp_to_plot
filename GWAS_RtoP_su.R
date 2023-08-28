@@ -405,7 +405,7 @@ bar_distribution <- function(plot_temp){
 
   for (i in 1:nrow(slist)) {
     pheno_temp <- pheno[,c(1, which(names(pheno) == slist$QCcode[i]))]
-    pheno_num <- length(pheno[ !duplicated(pheno[,2]), 2])
+    pheno_num <- length(pheno_temp[ !duplicated(pheno_temp[,2]), 2])
     geno_temp <- slist[i,]
     geno_pheno_temp <- data.frame(t(geno_temp))
     geno_pheno_temp[,2] <- rownames(geno_pheno_temp)
