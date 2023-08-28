@@ -17,6 +17,7 @@ requirment <- function(
   #require library----
     library(tidyverse)
     library(snp.plotter)
+    library("viridis")
     source("https://raw.githubusercontent.com/YinLiLin/CMplot/master/R/CMplot.r")
     
     #require input----
@@ -404,6 +405,7 @@ bar_distribution <- function(plot_temp){
 
   for (i in 1:nrow(slist)) {
     pheno_temp <- pheno[,c(1, which(names(pheno) == slist$QCcode[i]))]
+    pheno_num <- length(pheno[ !duplicated(pheno[,2]), 2])
     geno_temp <- slist[i,]
     geno_pheno_temp <- data.frame(t(geno_temp))
     geno_pheno_temp[,2] <- rownames(geno_pheno_temp)
@@ -414,7 +416,7 @@ bar_distribution <- function(plot_temp){
     
     SNPs <- Allele_plot(geno_temp)
     allele_color <- c("A" = "#2121D9", "G" = "#3399FF", "N" = "gray", "C" = "#A945FF", "T" = "#FE2E9A", "+" = "#FF9326", "-" = "#04B404")
-    trait_color <- c("#2121D9", "#A945FF", "#FE2E9A", "#3399FF", "#FF9326", "gray")
+    trait_color <- viridis(pheno_num) 
     #allele_color <- c("A" = "#FF3333", "G" = "#FF7F00", "N" = "gray", "C" = "#4DAF4A", "T" = "#3399FF", "+" = "#FF7F00", "-" = "#4DAF4A")
     #trait_color <- c("#00CC00", "#FF0000", "#FF8000", "#3399FF", "#CCOOCC", "gray")
     #discrete or continue
